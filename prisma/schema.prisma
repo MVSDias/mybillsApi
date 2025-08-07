@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum TransactionType {
+  expense
+  income
+}
+
+model Category {
+  id        String          @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  color     String
+  type      TransactionType // só terá dois tipos: expense ou income
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  //relacionamento entre collections 
+  transactions Transaction[]
+
+  @@unique([name, type]) // só posso ter um tipo com o mmesmo nome(não posso ter 2 TRANSAÇÕES mercado com despesa )
+}
+
+model Transaction {
+  id          String          @id @default(auto()) @map("_id") @db.ObjectId
+  description String
+  amount      Float
+  date        DateTime
+  type        TransactionType
+  userId      String // vem do firebase - por isso não tem relacionamento aqui, só externo.
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  //RELACIONAMENTO
+  categoryId String   @db.ObjectId
+  category   Category @relation(fields: [categoryId], references: [id]) // guarda no campo categoryId a informação do campo id da tabela category
+
+  @@index([userId, date]) // para fazer pesquisa por usuario e data
+  @@index([userId, date, categoryId]) // para fazer pesquisa por usuário, data e categoria
+}
