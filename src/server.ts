@@ -13,7 +13,7 @@ const startServer = async () => {
     await prismaConnect(); 
     await initializeGlobalCategories();
 
-    await app.listen({ port: port }).then(() => {
+    await app.listen({ port: port, host: "0.0.0.0" }).then(() => {
       console.log(`🚀 Server online on port ${port}`);
     });
   } catch (err) {
